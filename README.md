@@ -422,3 +422,281 @@ WHERE Goods.good_name='red caviar' OR  Goods.good_name='black caviar';
 ```
 
 ---
+#### ✅***Задание №34:*** 
+**Сколько всего 10-ых классов. Используйте конструкцию "as count" для агрегатной функции подсчета количества классов. Это необходимо для корректной проверки. Поля в результирующей таблице: count**
+
+```SQL
+SELECT distinct count(name) as count
+FROM Class
+WHERE name LIKE '10_%';
+```
+
+---
+#### ✅***Задание №35:*** 
+**Сколько различных кабинетов школы использовались 2 сентября 2019 года для проведения занятий? Используйте конструкцию "as count" для агрегатной функции подсчета количества различных кабинетов. Это необходимо для корректной проверки. Поля в результирующей таблице: count**
+
+```SQL
+SELECT COUNT(DISTINCT classroom) AS count
+FROM Schedule
+WHERE date LIKE "2019-09-02%";
+```
+
+---
+#### ✅***Задание №36:*** 
+**Выведите информацию об обучающихся, живущих на улице Пушкина (ul. Pushkina)? Поля в результирующей таблице:** \*
+
+```SQL
+SELECT *
+FROM  Student
+WHERE address LIKE '%_Pushkina%';
+```
+
+---
+#### ✅***Задание №37:*** 
+**Сколько лет самому молодому обучающемуся? Используйте конструкцию "as year" для указания возраста учащегося. Это необходимо для корректной проверки. Поля в результирующей таблице: year**
+
+```SQL
+SELECT TIMESTAMPDIFF(YEAR,MAX(birthday),NOW()) as year
+FROM Student;
+```
+
+---
+#### ✅***Задание №38:*** 
+**Сколько учениц с именем Анна (Anna) учится в школе? Используйте конструкцию "as count" для агрегатной функции подсчета количества учащихся. Это необходимо для корректной проверки. Поля в результирующей таблице:
+count**
+
+```SQL
+SELECT COUNT(first_name) as count
+FROM Student
+WHERE first_name='Anna';
+```
+
+---
+#### ✅***Задание №39:*** 
+**Сколько обучающихся в 10 B классе? Используйте конструкцию "as count" для агрегатной функции подсчета количества учащихся. Это необходимо для корректной проверки. Поля в результирующей таблице: count**
+
+```SQL
+SELECT COUNT(student) AS count
+FROM Student_in_class
+JOIN Class
+ON Student_in_class.class = Class.id
+WHERE Class.name = '10 B';
+```
+
+---
+#### ✅***Задание №40:*** 
+**Выведите название предметов, которые преподает Ромашкин П.П. (Romashkin P.P.). Обратите внимание, что в базе данных есть несколько учителей с такой фамилией. Используйте конструкцию "as subjects" для указания учебных предметов. Это необходимо для корректной проверки. Поля в результирующей таблице: subjects**
+
+```SQL
+SELECT name as subjects
+FROM Teacher
+JOIN Schedule
+ON Schedule.teacher = Teacher.id
+JOIN Subject
+ON Subject.id = Schedule.subject
+WHERE first_name LIKE 'P%'
+AND middle_name LIKE 'P%'
+AND last_name LIKE 'Romashkin';
+```
+
+---
+#### ✅***Задание №41:*** 
+**Выясните, во сколько по расписанию начинается четвёртое занятие. Поля в результирующей таблице: start_pair**
+
+```SQL
+SELECT start_pair
+FROM Timepair
+WHERE start_pair LIMIT 1 OFFSET 3;
+```
+
+---
+#### ✅***Задание №42:*** 
+**Сколько времени обучающийся будет находиться в школе, учась со 2-го по 4-ый уч. предмет? Используйте конструкцию "as time" для указания разницы во времени. Это необходимо для корректной проверки. Результат должен быть в формате HH:MM:SS Поля в результирующей таблице: time**
+
+```SQL
+SELECT DISTINCT TIMEDIFF(
+(SELECT end_pair
+FROM Timepair
+WHERE id = '4'),
+(SELECT start_pair
+FROM Timepair
+WHERE id = '2')
+) AS time
+FROM Timepair;
+```
+
+---
+#### ✅***Задание №43:*** 
+**Выведите фамилии преподавателей, которые ведут физическую культуру (Physical Culture). Отсортируйте преподавателей по фамилии в алфавитном порядке. Поля в результирующей таблице: last_name**
+
+```SQL
+SELECT last_name
+FROM Teacher
+JOIN Schedule
+ON Teacher.id=Schedule.teacher
+JOIN Subject
+ON Schedule.subject=Subject.id
+WHERE Subject.name='Physical Culture'
+GROUP BY last_name
+ORDER BY last_name ASC;
+```
+
+---
+#### ✅***Задание №44:*** 
+**Найдите максимальный возраст (количество лет) среди обучающихся 10 классов на сегодняшний день. Для получения текущих даты и времени используйте функцию NOW(). Используйте конструкцию "as max_year" для указания максимального возраста в годах. Это необходимо для корректной проверки. Поля в результирующей таблице: max_year**
+
+```SQL
+SELECT MAX(TIMESTAMPDIFF(YEAR,birthday,CURRENT_DATE)) AS max_year
+FROM Student
+JOIN Student_in_class
+ON Student.id = Student_in_class.student
+JOIN Class
+ON Student_in_class.class = Class.id
+WHERE Class.name LIKE '10%';
+```
+
+---
+#### ✅***Задание №45:*** 
+**Какие кабинеты чаще всего использовались для проведения занятий? Выведите те, которые использовались максимальное количество раз. Поля в результирующей таблице: classroom**
+
+```SQL
+SELECT classroom
+FROM Schedule
+GROUP BY classroom
+HAVING COUNT(classroom) = (
+SELECT COUNT(classroom)
+FROM Schedule
+GROUP BY classroom
+ORDER BY COUNT(classroom) DESC LIMIT 1);
+```
+
+---
+#### ✅***Задание №46:*** 
+**В каких классах ведёт занятия преподаватель "Krauze"? Поля в результирующей таблице: name**
+
+```SQL
+SELECT name
+FROM Class
+JOIN Schedule
+ON Class.id=Schedule.class
+JOIN Teacher
+ON Schedule.teacher=Teacher.id
+WHERE last_name='Krauze'
+GROUP BY name;
+```
+
+---
+#### ✅***Задание №47:*** 
+**Сколько занятий провел Krauze 30 августа 2019 г.? Используйте конструкцию "as count" для агрегатной функции подсчета числа занятий. Это необходимо для корректной проверки. Поля в результирующей таблице: count**
+
+```SQL
+SELECT COUNT(teacher) AS count
+FROM Schedule
+WHERE teacher = (
+SELECT id
+FROM Teacher
+WHERE last_name = 'Krauze')
+AND DATE(date) = '2019-08-30';
+```
+
+---
+#### ✅***Задание №48:*** 
+**Выведите заполненность классов в порядке убывания. Используйте конструкцию "as count" для агрегатной функции подсчета числа учащихся в классах. Это необходимо для корректной проверки. Поля в результирующей таблице:
+name count**
+
+```SQL
+SELECT name,
+COUNT(Student_in_class.student) AS count
+FROM Class
+JOIN Student_in_class
+ON Student_in_class.class = Class.id
+GROUP BY Class.name
+ORDER BY count DESC;
+```
+
+---
+#### ✅***Задание №49:*** 
+**Какой процент обучающихся учится в "10 A" классе? Выведите ответ в диапазоне от 0 до 100 с округлением до четырёх знаков после запятой, например, 96.0201. Используйте конструкцию "as percent" для представления результата вычисления. Это необходимо для корректной проверки. Поля в результирующей таблице: percent**
+
+```SQL
+SELECT COUNT(student) * 100 / (
+SELECT COUNT(student)
+FROM Student_in_class) AS percent
+FROM Student_in_class
+JOIN Class
+ON Student_in_class.class = Class.id
+WHERE name='10 A';
+
+-- или так
+
+SELECT ROUND((
+SELECT COUNT(*)
+FROM Student_in_class
+WHERE class IN (
+SELECT id
+FROM Class
+WHERE name = '10 A'
+)) * 100.0 / COUNT(*), 4) AS percent
+FROM Student_in_class;
+```
+
+---
+#### ✅***Задание №50:*** 
+**Какой процент обучающихся родился в 2000 году? Результат округлить до целого в меньшую сторону. Используйте конструкцию "as percent" для указания процента. Это необходимо для корректной проверки. Поля в результирующей таблице: percent**
+
+```SQL
+SELECT FLOOR(COUNT(birthday) * 100.0 / (
+SELECT COUNT(*)
+FROM Student)) AS percent
+FROM Student
+WHERE birthday LIKE '2000%';
+```
+
+---
+#### ✅***Задание №51:*** 
+**Добавьте товар с именем "Cheese" и типом "food" в список товаров (Goods). В качестве первичного ключа (good_id) укажите количество записей в таблице + 1.**
+
+```SQL
+INSERT INTO Goods (good_id, good_name, type)
+SELECT (
+SELECT COUNT(*) + 1
+FROM Goods),
+'Cheese',(
+SELECT good_type_id
+FROM GoodTypes
+WHERE good_type_name = 'food');
+```
+
+---
+#### ✅***Задание №52:*** 
+**Добавьте в список типов товаров (GoodTypes) новый тип "auto". В качестве первичного ключа (good_type_id) укажите количество записей в таблице + 1.**
+
+```SQL
+INSERT INTO GoodTypes (good_type_id, good_type_name)
+SELECT (
+SELECT COUNT(*) + 1
+FROM GoodTypes),
+'auto';
+```
+
+---
+#### ✅***Задание №53:*** 
+**Измените имя "Andie Quincey" на новое "Andie Anthony".**
+
+```SQL
+UPDATE FamilyMembers 
+SET member_name = 'Andie Anthony'
+WHERE member_name = 'Andie Quincey';
+```
+
+---
+#### ✅***Задание №54:*** 
+**Удалить всех членов семьи с фамилией "Quincey".**
+
+```SQL
+DELETE
+FROM FamilyMembers
+WHERE member_name LIKE '%Quincey';
+```
+
+---
