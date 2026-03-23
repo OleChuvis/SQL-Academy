@@ -700,3 +700,114 @@ WHERE member_name LIKE '%Quincey';
 ```
 
 ---
+#### ✅***Задание №55:*** 
+**Удалить компании, совершившие наименьшее количество рейсов.**
+
+```SQL
+DELETE 
+FROM Company 
+WHERE id IN (
+SELECT company
+FROM trip
+GROUP BY company
+HAVING COUNT(*) = (
+SELECT COUNT(*) AS count
+FROM trip
+GROUP BY company
+ORDER BY COUNT LIMIT 1)
+)
+
+-- второй вариант
+
+SELECT name,
+COUNT(company) as company 
+FROM Trip
+JOIN Company
+ON Company.id=Trip.company 
+GROUP BY name;
+DELETE
+FROM Company
+WHERE id = 4; 
+DELETE
+FROM Company 
+WHERE id = 3;
+DELETE 
+FROM Company 
+WHERE id = 2;
+```
+
+---
+#### ✅***Задание №56:*** 
+**Удалить все перелеты, совершенные из Москвы (Moscow).**
+
+```SQL
+DELETE 
+FROM Trip
+WHERE town_from = 'Moscow';
+```
+
+---
+#### ✅***Задание №57:*** 
+**Перенести расписание всех занятий на 30 мин. вперед.**
+
+```SQL
+UPDATE Timepair 
+SET start_pair = DATE_ADD(start_pair, INTERVAL 30 MINUTE); 
+UPDATE Timepair 
+SET end_pair = DATE_ADD(end_pair, INTERVAL 30 MINUTE)
+
+-- второй вариант
+
+UPDATE Timepair
+SET start_pair = ADDTIME(start_pair, '00:30:00'),
+end_pair = ADDTIME(end_pair, '00:30:00');
+```
+
+---
+#### ✅***Задание №58:*** 
+**Добавить отзыв с рейтингом 5 на жилье, находящиеся по адресу "11218, Friel Place, New York", от имени "George Clooney". В качестве первичного ключа (id) укажите количество записей в таблице + 1.
+Резервация комнаты, на которую вам нужно оставить отзыв, уже была сделана, нужно лишь ее найти.**
+
+```SQL
+INSERT INTO Reviews
+SET id = (
+SELECT COUNT(*) + 1
+FROM Reviews rw
+),
+reservation_id = (
+SELECT rs.id
+FROM Reservations rs
+JOIN Rooms rm
+ON rm.id = rs.room_id
+JOIN Users us
+ON rs.user_id = us.id
+WHERE address = '11218, Friel Place, New York' AND name = 'George Clooney'
+),
+rating = 5;
+```
+
+---
+#### ✅***Задание №59:*** 
+**Вывести пользователей,указавших Белорусский номер телефона? Телефонный код Белоруссии +375. Поля в результирующей таблице:** \*
+
+```SQL
+SELECT *
+FROM Users 
+WHERE phone_number LIKE '+375%';
+```
+
+---
+#### ✅***Задание №60:*** 
+**Выведите идентификаторы преподавателей, которые хотя бы один раз за всё время преподавали в каждом из одиннадцатых классов. Поля в результирующей таблице: teacher**
+
+```SQL
+SELECT teacher
+FROM Schedule sc
+JOIN Class cl
+ON sc.class = cl.id
+WHERE name LIKE '11 %'
+GROUP BY teacher
+HAVING COUNT(DISTINCT name) = 2;
+```
+
+---
